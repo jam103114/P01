@@ -8,6 +8,7 @@ public class ThirdPersonMovement : MonoBehaviour
     public event Action Idle = delegate { };
     public event Action StartWalking = delegate { };
     public event Action StartRunning = delegate { };
+    public event Action StartJumping = delegate { };
 
     public CharacterController controller;
     public Transform cam;
@@ -19,6 +20,8 @@ public class ThirdPersonMovement : MonoBehaviour
     float turnSmoothVelocity;
     bool _isMoving = false;
     bool _isRunning = false;
+
+    public Animator _anim;
 
 ///////////////////////////////////////////////
     Vector3 velocity;
@@ -32,6 +35,7 @@ public class ThirdPersonMovement : MonoBehaviour
 
     private void Start()
     {
+        _anim.GetComponent<Animator>();
         Idle?.Invoke();
     }
 
@@ -46,6 +50,8 @@ public class ThirdPersonMovement : MonoBehaviour
 
         if (Input.GetButtonDown("Jump") && isGrounded)
         {
+            _anim.StopPlayback();
+            StartJumping?.Invoke();
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }
 
@@ -65,6 +71,7 @@ public class ThirdPersonMovement : MonoBehaviour
         {
             if (direction.magnitude >= 0.1f)
             {
+                _anim.StopPlayback();
                 CheckIfStartRunning();
                 float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + cam.eulerAngles.y;
                 float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
@@ -82,6 +89,7 @@ public class ThirdPersonMovement : MonoBehaviour
         {
             if (direction.magnitude >= 0.1f)
             {
+                _anim.StopPlayback();
                 CheckIfStartedMoving();
                 float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + cam.eulerAngles.y;
                 float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
@@ -101,6 +109,7 @@ public class ThirdPersonMovement : MonoBehaviour
 
     private void CheckIfStartRunning()
     {
+        
         _isMoving = true;
         if (_isRunning == false)
         {
