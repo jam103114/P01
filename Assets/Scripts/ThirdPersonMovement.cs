@@ -20,6 +20,15 @@ public class ThirdPersonMovement : MonoBehaviour
     bool _isMoving = false;
     bool _isRunning = false;
 
+///////////////////////////////////////////////
+    Vector3 velocity;
+    public float gravity = -9.81f;
+    public Transform groundCheck;
+    public float groundDistance = 0.4f;
+    public LayerMask groundMask;
+    bool isGrounded;
+    public float jumpHeight = 3f;
+
 
     private void Start()
     {
@@ -28,14 +37,29 @@ public class ThirdPersonMovement : MonoBehaviour
 
     void Update()
     {
+        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+
+        if (isGrounded && velocity.y < 0)
+        {
+            velocity.y = -2f;
+        }
+
+        if (Input.GetButtonDown("Jump") && isGrounded)
+        {
+            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+        }
+
+        velocity.y += gravity * Time.deltaTime;
+        controller.Move(velocity * Time.deltaTime);
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////
         float horizontal = Input.GetAxisRaw("Horizontal");
         float vertical = Input.GetAxisRaw("Vertical");
-        //float fire3 = Input.GetAxis("Fire3") > 0;
-
 
         Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
-
-
 
         if (Input.GetKey(KeyCode.LeftShift))
         {
@@ -71,6 +95,7 @@ public class ThirdPersonMovement : MonoBehaviour
                 CheckIfStoppedMoving();
             }
         }
+///////////////////////////////////////////////////////////////////////////////////////////////////////
     }
 
 
