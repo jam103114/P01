@@ -8,9 +8,10 @@ public class PlayerCharacterAnimator : MonoBehaviour
     [SerializeField] ThirdPersonMovement _thirdPersonMovement = null;
 
     const string IdleState = "Idle";
-    const string RunState = "Run";
+    const string WalkState = "Walk";
     const string JumpState = "Jumping";
     const string FallState = "Falling";
+    const string RunState = "Run";
 
     Animator _animator = null;
 
@@ -29,15 +30,22 @@ public class PlayerCharacterAnimator : MonoBehaviour
         _animator.CrossFadeInFixedTime(RunState, .2f);
     }
 
+    public void OnStartWalking()
+    {
+        _animator.CrossFadeInFixedTime(WalkState, .2f);
+    }
+
     private void OnEnable()
     {
         _thirdPersonMovement.Idle += OnIdle;
+        _thirdPersonMovement.StartWalking += OnStartWalking;
         _thirdPersonMovement.StartRunning += OnStartRunning;
     }
 
     private void OnDisable()
     {
         _thirdPersonMovement.Idle += OnIdle;
+        _thirdPersonMovement.StartWalking -= OnStartWalking;
         _thirdPersonMovement.StartRunning -= OnStartRunning;
     }
 }
