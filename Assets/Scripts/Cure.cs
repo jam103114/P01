@@ -8,6 +8,9 @@ public class Cure : Ability
 
     public override void Use(Transform origin, Transform target)
     {
+        if(target == null) { return; }
         Debug.Log("Cast Cure." + target.gameObject.name);
+        target.GetComponent<Health>()?.Heal(_healAmount);
+
     }
 }

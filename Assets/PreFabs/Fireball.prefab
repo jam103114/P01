@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3085839130657490131}
   - component: {fileID: 7346551221839093943}
   m_Layer: 0
-  m_Name: Fireball 1
+  m_Name: Fireball
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -43,3 +43,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1484a5457ca9fb45ba35469d7084f6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _projectileSpawned: {fileID: 5017157948662635414, guid: 3dd1055b3b18ccb4e812e99857736e6d,
+    type: 3}
