@@ -12,6 +12,7 @@ public class PlayerCharacterAnimator : MonoBehaviour
     const string JumpState = "Jump";
     const string FallState = "Falling";
     const string RunState = "Run";
+    const string AttackState = "Attack";
 
     Animator _animator = null;
 
@@ -40,12 +41,18 @@ public class PlayerCharacterAnimator : MonoBehaviour
         _animator.CrossFadeInFixedTime(JumpState, .2f);
     }
 
+    public void OnStartAttack()
+    {
+        _animator.Play("Attack");
+    }
+
     private void OnEnable()
     {
         _thirdPersonMovement.Idle += OnIdle;
         _thirdPersonMovement.StartWalking += OnStartWalking;
         _thirdPersonMovement.StartRunning += OnStartRunning;
         _thirdPersonMovement.StartJumping += OnStartJumping;
+        _thirdPersonMovement.StartAttacking += OnStartAttack;
     }
 
     private void OnDisable()
@@ -54,5 +61,6 @@ public class PlayerCharacterAnimator : MonoBehaviour
         _thirdPersonMovement.StartWalking -= OnStartWalking;
         _thirdPersonMovement.StartRunning -= OnStartRunning;
         _thirdPersonMovement.StartJumping -= OnStartJumping;
+        _thirdPersonMovement.StartAttacking -= OnStartAttack;
     }
 }

@@ -2,13 +2,26 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using UnityEngine.SceneManagement;
 
 public class ThirdPersonMovement : MonoBehaviour
 {
+    [SerializeField] AbilityLoadout _abilityLoadout;
+    [SerializeField] Ability _startingAbility;
+    [SerializeField] Ability _newAbilityToTest;
+    [SerializeField] Ability _mainAbility;
+    [SerializeField] Transform _testTarget = null;
+    [SerializeField] Transform _testTarget2 = null;
+    [SerializeField] GameObject _playerObject = null;
+
+    public Transform CurrentTarget { get; private set; }
+
+
     public event Action Idle = delegate { };
     public event Action StartWalking = delegate { };
     public event Action StartRunning = delegate { };
     public event Action StartJumping = delegate { };
+    public event Action StartAttacking = delegate { };
 
     public CharacterController controller;
     public Transform cam;
@@ -20,6 +33,7 @@ public class ThirdPersonMovement : MonoBehaviour
     float turnSmoothVelocity;
     bool _isMoving = false;
     bool _isRunning = false;
+    public bool hit = false;
 
     public Animator _anim;
 
@@ -33,6 +47,13 @@ public class ThirdPersonMovement : MonoBehaviour
     public float jumpHeight = 3f;
 
 
+    private void Awake()
+    {
+        if (_startingAbility != null)
+        {
+            _abilityLoadout?.EquipAbility(_startingAbility);
+        }
+    }
     private void Start()
     {
         _anim.GetComponent<Animator>();
@@ -103,7 +124,49 @@ public class ThirdPersonMovement : MonoBehaviour
                 CheckIfStoppedMoving();
             }
         }
-///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            _playerObject.transform.LookAt(CurrentTarget);
+
+            _abilityLoadout.UseEquippedAbility(CurrentTarget);
+
+
+        }
+
+        if (Input.GetKeyDown(KeyCode.LeftControl))
+        {
+            _abilityLoadout.EquipAbility(_newAbilityToTest);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            SetTarget(_testTarget);
+        }
+
+        if(Input.GetKeyDown(KeyCode.Mouse0))
+        {
+            //Attack
+            SetTarget(_testTarget2);
+            StartAttacking?.Invoke();
+            if (hit == true)
+            {
+                _abilityLoadout.EquipAbility(_mainAbility);
+                _abilityLoadout.UseEquippedAbility(CurrentTarget);
+            }
+            hit = false;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Application.Quit();
+        }
+
+        if(Input.GetKeyDown(KeyCode.Backspace))
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////
     }
 
 
@@ -137,5 +200,11 @@ public class ThirdPersonMovement : MonoBehaviour
             Debug.Log("Stopped");
         }
         _isMoving = false;
+    }
+
+    public void SetTarget(Transform newTarget)
+    {
+        CurrentTarget = newTarget;
+        Debug.Log("Current Target " + newTarget);
     }
 }
