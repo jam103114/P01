@@ -13,6 +13,9 @@ public class ThirdPersonMovement : MonoBehaviour
     [SerializeField] Transform _testTarget = null;
     [SerializeField] Transform _testTarget2 = null;
     [SerializeField] GameObject _playerObject = null;
+    [SerializeField] AudioSource _audioSource = null;
+    [SerializeField] AudioClip _smite;
+    [SerializeField] AudioClip _attack;
 
     public Transform CurrentTarget { get; private set; }
 
@@ -149,10 +152,14 @@ public class ThirdPersonMovement : MonoBehaviour
             //Attack
             SetTarget(_testTarget2);
             StartAttacking?.Invoke();
+            _audioSource.clip = _attack;
+            _audioSource.Play();
             if (hit == true)
             {
                 _abilityLoadout.EquipAbility(_mainAbility);
                 _abilityLoadout.UseEquippedAbility(CurrentTarget);
+                _audioSource.clip = _smite;
+                _audioSource.Play();
             }
             hit = false;
         }
