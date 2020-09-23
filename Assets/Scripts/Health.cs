@@ -11,4 +11,14 @@ public class Health : MonoBehaviour
         _currentHealth += amount;
         Debug.Log(gameObject.name + " has healed " + amount);
     }
+
+    public void TakeDamage(int amount)
+    {
+        //can call Kill()
+    }
+
+    public void Kill()
+    {
+
+    }
 }
