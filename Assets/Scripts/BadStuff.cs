@@ -7,6 +7,7 @@ public class BadStuff : MonoBehaviour
     public int _damage = 5;
     public float timer = 5f;
 
+
     private void OnTriggerEnter(Collider other)
     {
         if(other.gameObject.tag == "Player")

@@ -6,6 +6,7 @@ using UnityEngine;
 public class PlayerCharacterAnimator : MonoBehaviour
 {
     [SerializeField] ThirdPersonMovement _thirdPersonMovement = null;
+    [SerializeField] Health _playerHealth = null;
 
     const string IdleState = "Idle";
     const string WalkState = "Walk";
@@ -13,6 +14,8 @@ public class PlayerCharacterAnimator : MonoBehaviour
     const string FallState = "Falling";
     const string RunState = "Run";
     const string AttackState = "Attack";
+    const string DamageState = "Damaged";
+    const string DeathState = "Death";
 
     Animator _animator = null;
 
@@ -46,6 +49,16 @@ public class PlayerCharacterAnimator : MonoBehaviour
         _animator.Play("Attack");
     }
 
+    public void OnTakeDamage()
+    {
+        _animator.CrossFadeInFixedTime(DamageState, .2f);
+    }
+
+    public void OnDeath()
+    {
+        _animator.CrossFadeInFixedTime(DeathState, .2f);
+    }
+
     private void OnEnable()
     {
         _thirdPersonMovement.Idle += OnIdle;
@@ -53,6 +66,8 @@ public class PlayerCharacterAnimator : MonoBehaviour
         _thirdPersonMovement.StartRunning += OnStartRunning;
         _thirdPersonMovement.StartJumping += OnStartJumping;
         _thirdPersonMovement.StartAttacking += OnStartAttack;
+        _playerHealth.takeDamage += OnTakeDamage;
+        _playerHealth.death += OnDeath;
     }
 
     private void OnDisable()
@@ -62,5 +77,7 @@ public class PlayerCharacterAnimator : MonoBehaviour
         _thirdPersonMovement.StartRunning -= OnStartRunning;
         _thirdPersonMovement.StartJumping -= OnStartJumping;
         _thirdPersonMovement.StartAttacking -= OnStartAttack;
+        _playerHealth.takeDamage -= OnTakeDamage;
+        _playerHealth.death -= OnDeath;
     }
 }

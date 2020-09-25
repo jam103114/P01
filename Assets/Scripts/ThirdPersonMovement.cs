@@ -48,7 +48,7 @@ public class ThirdPersonMovement : MonoBehaviour
     public LayerMask groundMask;
     bool isGrounded;
     public float jumpHeight = 3f;
-
+    public bool alive = true;
 
     private void Awake()
     {
@@ -72,12 +72,16 @@ public class ThirdPersonMovement : MonoBehaviour
             velocity.y = -2f;
         }
 
-        if (Input.GetButtonDown("Jump") && isGrounded)
+        if(alive == true)
         {
-            _anim.StopPlayback();
-            StartJumping?.Invoke();
-            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            if (Input.GetButtonDown("Jump") && isGrounded)
+            {
+                _anim.StopPlayback();
+                StartJumping?.Invoke();
+                velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            }
         }
+
 
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
@@ -91,78 +95,82 @@ public class ThirdPersonMovement : MonoBehaviour
 
         Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
 
-        if (Input.GetKey(KeyCode.LeftShift))
+        if(alive == true)
         {
-            if (direction.magnitude >= 0.1f)
+            if (Input.GetKey(KeyCode.LeftShift))
             {
-                _anim.StopPlayback();
-                CheckIfStartRunning();
-                float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + cam.eulerAngles.y;
-                float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
-                transform.rotation = Quaternion.Euler(0f, angle, 0f);
+                if (direction.magnitude >= 0.1f)
+                {
+                    _anim.StopPlayback();
+                    CheckIfStartRunning();
+                    float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + cam.eulerAngles.y;
+                    float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
+                    transform.rotation = Quaternion.Euler(0f, angle, 0f);
 
-                Vector3 moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
-                controller.Move(moveDir.normalized * runSpeed * Time.deltaTime);
+                    Vector3 moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+                    controller.Move(moveDir.normalized * runSpeed * Time.deltaTime);
+                }
+                else
+                {
+                    CheckIfStoppedMoving();
+                }
             }
             else
             {
-                CheckIfStoppedMoving();
+                if (direction.magnitude >= 0.1f)
+                {
+                    _anim.StopPlayback();
+                    CheckIfStartedMoving();
+                    float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + cam.eulerAngles.y;
+                    float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
+                    transform.rotation = Quaternion.Euler(0f, angle, 0f);
+
+                    Vector3 moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+                    controller.Move(moveDir.normalized * speed * Time.deltaTime);
+                }
+                else
+                {
+                    CheckIfStoppedMoving();
+                }
             }
-        }
-        else 
-        {
-            if (direction.magnitude >= 0.1f)
+
+            if (Input.GetKeyDown(KeyCode.Alpha1))
             {
-                _anim.StopPlayback();
-                CheckIfStartedMoving();
-                float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + cam.eulerAngles.y;
-                float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
-                transform.rotation = Quaternion.Euler(0f, angle, 0f);
+                _playerObject.transform.LookAt(CurrentTarget);
 
-                Vector3 moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
-                controller.Move(moveDir.normalized * speed * Time.deltaTime);
-            }
-            else
-            {
-                CheckIfStoppedMoving();
-            }
-        }
-
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            _playerObject.transform.LookAt(CurrentTarget);
-
-            _abilityLoadout.UseEquippedAbility(CurrentTarget);
-
-
-        }
-
-        if (Input.GetKeyDown(KeyCode.LeftControl))
-        {
-            _abilityLoadout.EquipAbility(_newAbilityToTest);
-        }
-
-        if (Input.GetKeyDown(KeyCode.Tab))
-        {
-            SetTarget(_testTarget);
-        }
-
-        if(Input.GetKeyDown(KeyCode.Mouse0))
-        {
-            //Attack
-            SetTarget(_testTarget2);
-            StartAttacking?.Invoke();
-            _audioSource.clip = _attack;
-            _audioSource.Play();
-            if (hit == true)
-            {
-                _abilityLoadout.EquipAbility(_mainAbility);
                 _abilityLoadout.UseEquippedAbility(CurrentTarget);
-                _audioSource.clip = _smite;
-                _audioSource.Play();
+
+
             }
-            hit = false;
+
+            if (Input.GetKeyDown(KeyCode.LeftControl))
+            {
+                _abilityLoadout.EquipAbility(_newAbilityToTest);
+            }
+
+            if (Input.GetKeyDown(KeyCode.Tab))
+            {
+                SetTarget(_testTarget);
+            }
+
+            if (Input.GetKeyDown(KeyCode.Mouse0))
+            {
+                //Attack
+                SetTarget(_testTarget2);
+                StartAttacking?.Invoke();
+                _audioSource.clip = _attack;
+                _audioSource.Play();
+                if (hit == true)
+                {
+                    _abilityLoadout.EquipAbility(_mainAbility);
+                    _abilityLoadout.UseEquippedAbility(CurrentTarget);
+                    _audioSource.clip = _smite;
+                    _audioSource.Play();
+                }
+                hit = false;
+            }
         }
+        
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
