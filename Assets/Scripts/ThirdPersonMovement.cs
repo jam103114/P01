@@ -50,6 +50,15 @@ public class ThirdPersonMovement : MonoBehaviour
     public float jumpHeight = 3f;
     public bool alive = true;
 
+
+    ///////
+    //public GameObject target;
+    //public List<GameObject> targets = new List<GameObject>();
+    //public GameObject[] targets;
+    public int tarVal = 0;
+    Enemy target = null;
+    Enemy[] targets = null;
+
     private void Awake()
     {
         if (_startingAbility != null)
@@ -61,6 +70,23 @@ public class ThirdPersonMovement : MonoBehaviour
     {
         _anim.GetComponent<Animator>();
         Idle?.Invoke();
+        targets = GameObject.FindObjectsOfType<Enemy>();
+        if(targets == null)
+        {
+            Debug.Log("No game objects are tagged with 'Enemy'");
+        }
+        
+       /* if (targets == null) 
+        {
+            targets = GameObject.FindGameObjectsWithTag("Enemy");
+            target = targets[tarVal];
+            SetTarget(target.transform);
+        }
+
+        if (targets.Length == 0)
+        {
+            Debug.Log("No game objects are tagged with 'Enemy'");
+        }*/
     }
 
     void Update()
@@ -136,21 +162,30 @@ public class ThirdPersonMovement : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.Alpha1))
             {
+                _abilityLoadout.EquipAbility(_newAbilityToTest);
                 _playerObject.transform.LookAt(CurrentTarget);
-
                 _abilityLoadout.UseEquippedAbility(CurrentTarget);
 
 
             }
 
-            if (Input.GetKeyDown(KeyCode.LeftControl))
-            {
-                _abilityLoadout.EquipAbility(_newAbilityToTest);
-            }
-
             if (Input.GetKeyDown(KeyCode.Tab))
             {
-                SetTarget(_testTarget);
+                if(targets.Length - 1 == tarVal)
+                {
+                    tarVal = 0;
+                    target = targets[tarVal];
+                    Debug.Log("Target equals " + targets.Length);
+
+                }
+                else
+                {
+                    tarVal++;
+                    target = targets[tarVal];
+                    Debug.Log("Target else " + tarVal);
+                }
+                SetTarget(targets[tarVal].transform);
+                //SetTarget(_testTarget);*/
             }
 
             if (Input.GetKeyDown(KeyCode.Mouse0))
@@ -168,6 +203,7 @@ public class ThirdPersonMovement : MonoBehaviour
                     _audioSource.Play();
                 }
                 hit = false;
+                SetTarget(_testTarget);
             }
         }
         
