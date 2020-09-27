@@ -49,14 +49,12 @@ public class ThirdPersonMovement : MonoBehaviour
     bool isGrounded;
     public float jumpHeight = 3f;
     public bool alive = true;
+    Transform target = null;
 
 
     ///////
-    //public GameObject target;
-    //public List<GameObject> targets = new List<GameObject>();
-    //public GameObject[] targets;
     public int tarVal = 0;
-    Enemy target = null;
+   // Enemy target = null;
     Enemy[] targets = null;
 
     private void Awake()
@@ -75,18 +73,9 @@ public class ThirdPersonMovement : MonoBehaviour
         {
             Debug.Log("No game objects are tagged with 'Enemy'");
         }
-        
-       /* if (targets == null) 
-        {
-            targets = GameObject.FindGameObjectsWithTag("Enemy");
-            target = targets[tarVal];
-            SetTarget(target.transform);
-        }
-
-        if (targets.Length == 0)
-        {
-            Debug.Log("No game objects are tagged with 'Enemy'");
-        }*/
+        target = targets[tarVal].gameObject.transform.GetChild(2);
+        target.gameObject.SetActive(true);
+        SetTarget(targets[tarVal].transform);
     }
 
     void Update()
@@ -171,20 +160,21 @@ public class ThirdPersonMovement : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.Tab))
             {
+                target.gameObject.SetActive(false);
                 if(targets.Length - 1 == tarVal)
                 {
                     tarVal = 0;
-                    target = targets[tarVal];
                     Debug.Log("Target equals " + targets.Length);
 
                 }
                 else
                 {
                     tarVal++;
-                    target = targets[tarVal];
                     Debug.Log("Target else " + tarVal);
                 }
                 SetTarget(targets[tarVal].transform);
+                target = targets[tarVal].gameObject.transform.GetChild(2);
+                target.gameObject.SetActive(true);
                 //SetTarget(_testTarget);*/
             }
 
