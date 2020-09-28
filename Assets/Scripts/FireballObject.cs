@@ -19,9 +19,13 @@ public class FireballObject : MonoBehaviour
     {
         //DO A THING
         Debug.Log("Its a hit Captain");
-       // if(collision.gameObject.tag != "Player")
-        //{
-            Destroy(this.gameObject);
-        //}
+        if(collision.gameObject.tag == "Enemy")
+        {
+            Health health = collision.gameObject.GetComponent<Health>();
+            health.TakeDamage(10);
+            Debug.Log("Fireball Hit for 10 damage");
+        }
+        Destroy(this.gameObject);
+
     }
 }

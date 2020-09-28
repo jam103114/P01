@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using TMPro;
 
 public class ThirdPersonMovement : MonoBehaviour
 {
@@ -17,6 +19,12 @@ public class ThirdPersonMovement : MonoBehaviour
     [SerializeField] AudioClip _clipSmite;
     [SerializeField] AudioClip _clipAttack;
     [SerializeField] AudioClip _clipFireball;
+    [SerializeField] AudioClip _clipAttack2;
+    [SerializeField] AudioClip _clipHeal;
+    [SerializeField] GameObject _projectileSpawned = null;
+    [SerializeField] TMP_Text _btnFireball;
+    [SerializeField] TMP_Text _btnHeal;
+    [SerializeField] TMP_Text _btnSmite;
 
     public Transform CurrentTarget { get; private set; }
 
@@ -54,7 +62,12 @@ public class ThirdPersonMovement : MonoBehaviour
     public float jumpHeight = 3f;
     public bool alive = true;
     Transform target = null;
-    public Collider smiteTarget = null;
+    public Collider hitTarget = null;
+    public float fireballTimer = 10f;
+    public float smiteTimer = 10f;
+    public int healCounter = 3;
+    public bool fbTimer = false;
+    public bool smtTimer = false;
 
 
     ///////
@@ -80,6 +93,7 @@ public class ThirdPersonMovement : MonoBehaviour
         target = targets[tarVal].gameObject.transform.GetChild(2);
         target.gameObject.SetActive(true);
         SetTarget(targets[tarVal].transform);
+        _btnHeal.text = healCounter.ToString();
     }
 
     void Update()
@@ -103,14 +117,38 @@ public class ThirdPersonMovement : MonoBehaviour
 
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
-
-///////////////////////////////////////////////////////////////////////////////////////
         float horizontal = Input.GetAxisRaw("Horizontal");
         float vertical = Input.GetAxisRaw("Vertical");
 
         Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
 
-        if(alive == true)
+        if(smtTimer == true)
+        {
+            smiteTimer -= Time.deltaTime;
+
+            if(smiteTimer <= 0)
+            {
+                smiteTimer = 0;
+                smtTimer = false;
+                _btnSmite.gameObject.SetActive(false);
+            }
+            _btnSmite.text = smiteTimer.ToString("F0");
+        }
+
+        if (fbTimer == true)
+        {
+            fireballTimer -= Time.deltaTime;
+
+            if (fireballTimer <= 0)
+            {
+                fireballTimer = 0;
+                fbTimer = false;
+                _btnFireball.gameObject.SetActive(false);
+            }
+            _btnFireball.text = fireballTimer.ToString("F0");
+        }
+
+        if (alive == true)
         {
             if (Input.GetKey(KeyCode.LeftShift))
             {
@@ -151,73 +189,81 @@ public class ThirdPersonMovement : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.Alpha1))
             {
-                CastFireball?.Invoke();
-                _abilityLoadout.EquipAbility(_fireball);
-                _playerObject.transform.LookAt(CurrentTarget);
-                _abilityLoadout.UseEquippedAbility(CurrentTarget);
-                _audioSource.clip = _clipFireball;
-                _audioSource.Play();
+                if(fbTimer == false)
+                {
+                    CastFireball?.Invoke();
+                    _abilityLoadout.EquipAbility(_fireball);
+                    _playerObject.transform.LookAt(CurrentTarget);
+                    _abilityLoadout.UseEquippedAbility(CurrentTarget);
+                    _audioSource.clip = _clipFireball;
+                    _audioSource.Play();
+                    fbTimer = true;
+                    fireballTimer = 5f;
+                    _btnFireball.gameObject.SetActive(true);
+                }
             }
 
             if (Input.GetKeyDown(KeyCode.Alpha2))
             {
-                //Needs to be smite
-                //SetTarget(smiteTarget.gameObject.transform.GetChild(0).gameObject.transform);
-                CastSmite?.Invoke();
-                _abilityLoadout.EquipAbility(_smite);
-                _abilityLoadout.UseEquippedAbility(CurrentTarget);
-                _audioSource.clip = _clipSmite;
-                _audioSource.Play();
+                if(smtTimer == false)
+                {
+                    CastSmite?.Invoke();
+                    _abilityLoadout.EquipAbility(_smite);
+                    _abilityLoadout.UseEquippedAbility(CurrentTarget);
+                    _audioSource.clip = _clipSmite;
+                    _audioSource.Play();
+                    Health health = CurrentTarget.gameObject.GetComponent<Health>();
+                    health.TakeDamage(10);
+                    smtTimer = true;
+                    smiteTimer = 10f;
+                    _btnSmite.gameObject.SetActive(true);
+                }
             }
 
             if (Input.GetKeyDown(KeyCode.Alpha3))
             {
-                CastHeal?.Invoke();
-                _abilityLoadout.EquipAbility(_heal);
-                _audioSource.clip = _clipSmite;
-                _audioSource.Play();
-                _abilityLoadout.UseEquippedAbility(_playerObject.transform);
+                if(healCounter > 0)
+                {
+                    CastHeal?.Invoke();
+                    _abilityLoadout.EquipAbility(_heal);
+                    _audioSource.clip = _clipHeal;
+                    _audioSource.Play();
+                    _abilityLoadout.UseEquippedAbility(_playerObject.transform);
+                    healCounter--;
+                    _btnHeal.text = healCounter.ToString();
+                }
+                else
+                {
+                    Debug.Log("You are out of heals");
+                }
+
             }
 
             if (Input.GetKeyDown(KeyCode.Tab))
             {
-                target.gameObject.SetActive(false);
-                if(targets.Length - 1 == tarVal)
-                {
-                    tarVal = 0;
-                    Debug.Log("Target equals " + targets.Length);
-
-                }
-                else
-                {
-                    tarVal++;
-                    Debug.Log("Target else " + tarVal);
-                }
-                SetTarget(targets[tarVal].transform);
-                target = targets[tarVal].gameObject.transform.GetChild(2);
-                target.gameObject.SetActive(true);
+                TargetSystem();
             }
 
             if (Input.GetKeyDown(KeyCode.Mouse0))
             {
                 StartAttacking?.Invoke();
-                _audioSource.clip = _clipAttack;
+                _audioSource.clip = _clipAttack2;
                 _audioSource.Play();
                 if (hit == true)
                 {
-                    //SetTarget(smiteTarget.gameObject.transform.GetChild(0).gameObject.transform);
-                    _abilityLoadout.EquipAbility(_smite);
-                    _abilityLoadout.UseEquippedAbility(CurrentTarget);
-                    _audioSource.clip = _clipSmite;
+                    GameObject projectile = Instantiate(_projectileSpawned, hitTarget.gameObject.transform.position, hitTarget.gameObject.transform.rotation);
+                    _audioSource.clip = _clipAttack;
                     _audioSource.Play();
+                    Health enemyHP = hitTarget.gameObject.GetComponent<Health>();
+                    enemyHP.TakeDamage(10);
+                    if (hitTarget.gameObject.active == false)
+                    {
+                        hit = false;
+                    }
                 }
-                hit = false;
-                Debug.Log("Smite target " + smiteTarget.gameObject.transform.GetChild(0));
-
             }
         }
         
-
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             Application.Quit();
@@ -228,6 +274,23 @@ public class ThirdPersonMovement : MonoBehaviour
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
         ///////////////////////////////////////////////////////////////////////////////////////////////////////
+        if (targets[tarVal].gameObject.active == false)
+        {
+            target.gameObject.SetActive(false);
+            if (targets.Length - 1 == tarVal)
+            {
+                tarVal = 0;
+                Debug.Log("Target equals " + targets.Length);
+            }
+            else
+            {
+                tarVal++;
+                Debug.Log("Target else " + tarVal);
+            }
+            SetTarget(targets[tarVal].transform);
+            target = targets[tarVal].gameObject.transform.GetChild(2);
+            target.gameObject.SetActive(true);
+        }
     }
 
 
@@ -267,6 +330,24 @@ public class ThirdPersonMovement : MonoBehaviour
     {
         CurrentTarget = newTarget;
         Debug.Log("Current Target " + newTarget);
+    }
+
+    public void TargetSystem()
+    {
+        target.gameObject.SetActive(false);
+        if (targets.Length - 1 == tarVal)
+        {
+            tarVal = 0;
+            Debug.Log("Target equals " + targets.Length);
+        }
+        else
+        {
+            tarVal++;
+            Debug.Log("Target else " + tarVal);
+        }
+        SetTarget(targets[tarVal].transform);
+        target = targets[tarVal].gameObject.transform.GetChild(2);
+        target.gameObject.SetActive(true);
     }
 
 }

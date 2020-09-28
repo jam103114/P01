@@ -53,23 +53,36 @@ public class Health : MonoBehaviour
 
     public void TakeDamage(int amount)
     {
-        Debug.Log("Health.TakeDamage Was Called. Current Health: " + _currentHealth);
-        _currentHealth -= amount;
-        if(_currentHealth <= 0)
+        if (this.gameObject.active)
         {
-            _currentHealth = 0;
-            UpdateHealth();
-            Kill();
+            _currentHealth -= amount;
+            Debug.Log("Health.TakeDamage Was Called. Current Health: " + _currentHealth);
         }
 
         if(this.gameObject.tag == "Player")
         {
-            if(_currentHealth >0)
+            if (_currentHealth <= 0)
+            {
+                _currentHealth = 0;
+                UpdateHealth();
+                Kill();
+            }
+
+            if (_currentHealth >0)
             {
                 takeDamage?.Invoke();
                 _aS.clip = _hurt;
                 _aS.Play();
                 UpdateHealth();
+            }
+        }
+
+        if(this.gameObject.tag == "Enemy")
+        {
+            if(_currentHealth <= 0)
+            {
+                this.gameObject.SetActive(false);
+                //Destroy(this.gameObject);
             }
         }
     }
