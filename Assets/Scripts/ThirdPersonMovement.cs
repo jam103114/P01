@@ -7,15 +7,16 @@ using UnityEngine.SceneManagement;
 public class ThirdPersonMovement : MonoBehaviour
 {
     [SerializeField] AbilityLoadout _abilityLoadout;
-    [SerializeField] Ability _startingAbility;
-    [SerializeField] Ability _newAbilityToTest;
-    [SerializeField] Ability _mainAbility;
+    [SerializeField] Ability _heal;
+    [SerializeField] Ability _fireball;
+    [SerializeField] Ability _smite;
     [SerializeField] Transform _testTarget = null;
     [SerializeField] Transform _testTarget2 = null;
     [SerializeField] GameObject _playerObject = null;
     [SerializeField] AudioSource _audioSource = null;
-    [SerializeField] AudioClip _smite;
-    [SerializeField] AudioClip _attack;
+    [SerializeField] AudioClip _clipSmite;
+    [SerializeField] AudioClip _clipAttack;
+    [SerializeField] AudioClip _clipFireball;
 
     public Transform CurrentTarget { get; private set; }
 
@@ -25,6 +26,9 @@ public class ThirdPersonMovement : MonoBehaviour
     public event Action StartRunning = delegate { };
     public event Action StartJumping = delegate { };
     public event Action StartAttacking = delegate { };
+    public event Action CastFireball = delegate { };
+    public event Action CastSmite = delegate { };
+    public event Action CastHeal = delegate { };
 
     public CharacterController controller;
     public Transform cam;
@@ -50,18 +54,18 @@ public class ThirdPersonMovement : MonoBehaviour
     public float jumpHeight = 3f;
     public bool alive = true;
     Transform target = null;
+    public Collider smiteTarget = null;
 
 
     ///////
     public int tarVal = 0;
-   // Enemy target = null;
     Enemy[] targets = null;
 
     private void Awake()
     {
-        if (_startingAbility != null)
+        if (_heal != null)
         {
-            _abilityLoadout?.EquipAbility(_startingAbility);
+            _abilityLoadout?.EquipAbility(_heal);
         }
     }
     private void Start()
@@ -97,12 +101,8 @@ public class ThirdPersonMovement : MonoBehaviour
             }
         }
 
-
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
-
-
-
 
 ///////////////////////////////////////////////////////////////////////////////////////
         float horizontal = Input.GetAxisRaw("Horizontal");
@@ -151,11 +151,32 @@ public class ThirdPersonMovement : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.Alpha1))
             {
-                _abilityLoadout.EquipAbility(_newAbilityToTest);
+                CastFireball?.Invoke();
+                _abilityLoadout.EquipAbility(_fireball);
                 _playerObject.transform.LookAt(CurrentTarget);
                 _abilityLoadout.UseEquippedAbility(CurrentTarget);
+                _audioSource.clip = _clipFireball;
+                _audioSource.Play();
+            }
 
+            if (Input.GetKeyDown(KeyCode.Alpha2))
+            {
+                //Needs to be smite
+                //SetTarget(smiteTarget.gameObject.transform.GetChild(0).gameObject.transform);
+                CastSmite?.Invoke();
+                _abilityLoadout.EquipAbility(_smite);
+                _abilityLoadout.UseEquippedAbility(CurrentTarget);
+                _audioSource.clip = _clipSmite;
+                _audioSource.Play();
+            }
 
+            if (Input.GetKeyDown(KeyCode.Alpha3))
+            {
+                CastHeal?.Invoke();
+                _abilityLoadout.EquipAbility(_heal);
+                _audioSource.clip = _clipSmite;
+                _audioSource.Play();
+                _abilityLoadout.UseEquippedAbility(_playerObject.transform);
             }
 
             if (Input.GetKeyDown(KeyCode.Tab))
@@ -175,25 +196,24 @@ public class ThirdPersonMovement : MonoBehaviour
                 SetTarget(targets[tarVal].transform);
                 target = targets[tarVal].gameObject.transform.GetChild(2);
                 target.gameObject.SetActive(true);
-                //SetTarget(_testTarget);*/
             }
 
             if (Input.GetKeyDown(KeyCode.Mouse0))
             {
-                //Attack
-                SetTarget(_testTarget2);
                 StartAttacking?.Invoke();
-                _audioSource.clip = _attack;
+                _audioSource.clip = _clipAttack;
                 _audioSource.Play();
                 if (hit == true)
                 {
-                    _abilityLoadout.EquipAbility(_mainAbility);
+                    //SetTarget(smiteTarget.gameObject.transform.GetChild(0).gameObject.transform);
+                    _abilityLoadout.EquipAbility(_smite);
                     _abilityLoadout.UseEquippedAbility(CurrentTarget);
-                    _audioSource.clip = _smite;
+                    _audioSource.clip = _clipSmite;
                     _audioSource.Play();
                 }
                 hit = false;
-                SetTarget(_testTarget);
+                Debug.Log("Smite target " + smiteTarget.gameObject.transform.GetChild(0));
+
             }
         }
         
@@ -248,4 +268,5 @@ public class ThirdPersonMovement : MonoBehaviour
         CurrentTarget = newTarget;
         Debug.Log("Current Target " + newTarget);
     }
+
 }

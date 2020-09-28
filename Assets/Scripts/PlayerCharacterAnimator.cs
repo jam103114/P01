@@ -16,6 +16,9 @@ public class PlayerCharacterAnimator : MonoBehaviour
     const string AttackState = "Attack";
     const string DamageState = "Damaged";
     const string DeathState = "Death";
+    const string CastFireball = "Fireball";
+    const string CastSmite = "Smite";
+    const string CastHeal = "Heal";
 
     Animator _animator = null;
 
@@ -46,7 +49,7 @@ public class PlayerCharacterAnimator : MonoBehaviour
 
     public void OnStartAttack()
     {
-        _animator.Play("Attack");
+        _animator.Play(AttackState);
     }
 
     public void OnTakeDamage()
@@ -59,6 +62,21 @@ public class PlayerCharacterAnimator : MonoBehaviour
         _animator.CrossFadeInFixedTime(DeathState, .2f);
     }
 
+    public void OnCastFireball()
+    {
+        _animator.CrossFadeInFixedTime(CastFireball, .2f);
+    }
+
+    public void OnCastSmite()
+    {
+        _animator.CrossFadeInFixedTime(CastSmite, .2f);
+    }
+
+    public void OnCastHeal()
+    {
+        _animator.CrossFadeInFixedTime(CastHeal, .2f);
+    }
+
     private void OnEnable()
     {
         _thirdPersonMovement.Idle += OnIdle;
@@ -68,6 +86,9 @@ public class PlayerCharacterAnimator : MonoBehaviour
         _thirdPersonMovement.StartAttacking += OnStartAttack;
         _playerHealth.takeDamage += OnTakeDamage;
         _playerHealth.death += OnDeath;
+        _thirdPersonMovement.CastFireball += OnCastFireball;
+        _thirdPersonMovement.CastSmite += OnCastSmite;
+        _thirdPersonMovement.CastHeal += OnCastHeal;
     }
 
     private void OnDisable()
@@ -79,5 +100,8 @@ public class PlayerCharacterAnimator : MonoBehaviour
         _thirdPersonMovement.StartAttacking -= OnStartAttack;
         _playerHealth.takeDamage -= OnTakeDamage;
         _playerHealth.death -= OnDeath;
+        _thirdPersonMovement.CastFireball -= OnCastFireball;
+        _thirdPersonMovement.CastSmite -= OnCastSmite;
+        _thirdPersonMovement.CastHeal -= OnCastHeal;
     }
 }
